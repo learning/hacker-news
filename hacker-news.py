@@ -1,7 +1,11 @@
 import sublime
 import sublime_plugin
 
+from .api import API
+
 TITLE = 'Hacker News'
+
+api = API()
 
 class HackerNewsCommand(sublime_plugin.WindowCommand):
     def run(self):
@@ -16,7 +20,7 @@ class HackerNewsCommand(sublime_plugin.WindowCommand):
         else:
             news_view = self.create_view()
 
-        # news_view.run_command("renderlist")
+        news_view.run_command("load_top_stories")
 
     def create_view(self):
         view = self.window.new_file()
@@ -44,3 +48,18 @@ class HackerNewsCommand(sublime_plugin.WindowCommand):
         # self.disable_other_plugins(view)
 
         return view
+
+class LoadTopStoriesCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        # Remove all text
+        self.view.set_read_only(False)
+        selections = self.view.sel()
+        full_region = sublime.Region(0, self.view.size())
+        self.view.replace(edit, full_region, '')
+
+        # Show loading
+        self.view.insert(edit, 0, "Loading...")
+        self.view.set_read_only(True)
+
+        api.top_stories(lambda data: print('loaded %s' % data))
+        self.view.sel().clear()
