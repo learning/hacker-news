@@ -4,7 +4,9 @@ import sublime_plugin
 from .api import API
 
 TITLE = 'Hacker News'
+LIMIT = 30
 
+loaded = 0
 api = API()
 
 class HackerNewsCommand(sublime_plugin.WindowCommand):
@@ -58,8 +60,21 @@ class LoadTopStoriesCommand(sublime_plugin.TextCommand):
         self.view.replace(edit, full_region, '')
 
         # Show loading
-        self.view.insert(edit, 0, "Loading...")
+        self.view.insert(edit, 0, "Fetching Hacker News...")
         self.view.set_read_only(True)
 
-        api.top_stories(lambda data: print('loaded %s' % data))
+        api.top_stories(lambda data: load_items(self.view, data[:LIMIT]))
         self.view.sel().clear()
+
+def load_items(view, ids):
+    global loaded
+    loaded = 0
+    # maybe use asyncio
+    # https://stackoverflow.com/questions/34377319/combine-awaitables-like-promise-all
+    for id in ids:
+        api.item(id, lambda data: render_view(view, data))
+
+def render_view(view, story):
+    global loaded
+    print(story)
+    loaded += 1
