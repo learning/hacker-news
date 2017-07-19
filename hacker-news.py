@@ -5,8 +5,13 @@ from .api import API
 
 TITLE = 'Hacker News'
 LIMIT = 30
+TEMPLATE = '''%s. %s (%s)
+    %s points by %s | %s comments
+
+'''
 
 loaded = 0
+stories = None
 api = API()
 
 class HackerNewsCommand(sublime_plugin.WindowCommand):
@@ -55,26 +60,45 @@ class LoadTopStoriesCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         # Remove all text
         self.view.set_read_only(False)
-        selections = self.view.sel()
-        full_region = sublime.Region(0, self.view.size())
-        self.view.replace(edit, full_region, '')
+        self.view.replace(edit, sublime.Region(0, self.view.size()), '')
 
         # Show loading
         self.view.insert(edit, 0, "Fetching Hacker News...")
         self.view.set_read_only(True)
 
-        api.top_stories(lambda data: load_items(self.view, data[:LIMIT]))
+        api.top_stories(lambda data: load_items(self.view, edit, data[:LIMIT]))
         self.view.sel().clear()
 
-def load_items(view, ids):
-    global loaded
-    loaded = 0
-    # maybe use asyncio
-    # https://stackoverflow.com/questions/34377319/combine-awaitables-like-promise-all
-    for id in ids:
-        api.item(id, lambda data: render_view(view, data))
+class RenderTopStoriesCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        global stories
+        # Remove all text
+        self.view.set_read_only(False)
+        self.view.replace(edit, sublime.Region(0, self.view.size()), '')
 
-def render_view(view, story):
-    global loaded
-    print(story)
+        # Insert stories
+        for i, item in enumerate(stories):
+            self.view.insert(edit, self.view.size(),
+                TEMPLATE % (i + 1,
+                    item.get('title', 'Untitled News'),
+                    item.get('url'),
+                    item.get('score', 0),
+                    item.get('by', 'Anonymous'),
+                    item.get('descendants', 0)))
+
+
+        self.view.set_read_only(True)
+
+def load_items(view, edit, ids):
+    global loaded, stories
+    loaded = 0
+    stories = [None] * LIMIT
+    for index, id in enumerate(ids):
+        (lambda i: api.item(id, lambda data: render_view(view, edit, i, data)))(index)
+
+def render_view(view, edit, index, story):
+    global loaded, stories
+    stories[index] = story
     loaded += 1
+    if loaded is LIMIT:
+        view.run_command("render_top_stories")
