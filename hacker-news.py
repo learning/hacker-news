@@ -5,7 +5,9 @@ from .api import API
 
 TITLE = 'Hacker News'
 LIMIT = 30
-TEMPLATE = '''%s. %s (%s)
+ITEM_LINK = 'https://news.ycombinator.com/item?id=%s'
+TEMPLATE = '''%s. %s
+    (%s)
     %s points by %s | %s comments
 
 '''
@@ -32,7 +34,7 @@ class HackerNewsCommand(sublime_plugin.WindowCommand):
     def create_view(self):
         view = self.window.new_file()
 
-        # view.settings().set('color_scheme', "Packages/hacker-news/news.hidden-tmTheme")
+        view.settings().set('color_scheme', "Packages/hacker-news/hacker-news.tmTheme")
         view.settings().set("hacker_news", 'hn')
         view.settings().set('highlight_line', True)
         view.settings().set("line_numbers", True)
@@ -48,7 +50,7 @@ class HackerNewsCommand(sublime_plugin.WindowCommand):
         view.settings().set("default_encoding", "UTF-8")
         view.settings().set("show_minimap", False)
         view.settings().set("word_wrap", False)
-        # view.set_syntax_file('Packages/hacker-news/news.sublime-syntax')
+        view.set_syntax_file('Packages/hacker-news/hacker-news.sublime-syntax')
         view.set_scratch(True)
         view.set_name(TITLE)
 
@@ -81,7 +83,7 @@ class RenderTopStoriesCommand(sublime_plugin.TextCommand):
             self.view.insert(edit, self.view.size(),
                 TEMPLATE % (i + 1,
                     item.get('title', 'Untitled News'),
-                    item.get('url'),
+                    item.get('url', ITEM_LINK % item.get('id')),
                     item.get('score', 0),
                     item.get('by', 'Anonymous'),
                     item.get('descendants', 0)))

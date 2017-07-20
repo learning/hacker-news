@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>name</key>
+    <string>Hacker News Color Scheme</string>
+    <key>settings</key>
+    <array>
+        <!-- Global settings -->
+        <dict>
+            <key>settings</key>
+            <dict>
+                <key>background</key>
+                <string>#f6f6ef</string>
+                <key>foreground</key>
+                <string>#828282</string>
+                <key>caret</key>
+                <string>#000000</string>
+            </dict>
+        </dict>
+        <!-- Scope styles -->
+        <dict>
+            <key>name</key>
+            <string>Title</string>
+            <key>scope</key>
+            <string>hn.list.item.title</string>
+            <key>settings</key>
+            <dict>
+                <key>foreground</key>
+                <string>#000000</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

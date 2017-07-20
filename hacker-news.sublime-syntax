@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+name: Hacker News
+scope: text.hacker-news
+contexts:
+  main:
+    - match: '^\d+\.\s(.+)$'
+      scope: hn.list.item
+      captures:
+        1: hn.list.item.title
